@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FlaskApp</title>
+</head>
+<body>
+    <form name="ingredients_list"  method="post" action="/results">
+        <h1>Tell Us What You Have:</h1>
+        {% for ingredient in ingredients %}
+        <input type="checkbox" id="{{ ingredient[0] }}" name="ingredients" value="{{ ingredient[0] }}">
+        <label for="{{ ingredient[0] }}">{{ ingredient[1] }}</label><br>
+        {% endfor %}
+        <h1>Or, Upload Image</h1>
+       <input type="file" />
+        <h1>Sampling:</h1>
+        <table>
+            <tr>
+                <td> Select One </td>
+                <td>
+                    <fieldset id="sampling_type">
+                        <input type="radio" value=""> I want to use as many ingredients as possible in one recipe <br/>
+                        <input type="radio" value=""> I want a few recipes with different combinations of ingredients
+                    </fieldset>
+                </td>
+            </tr>
+        </table>
+        <input type="submit" name="submit" value="Show Me!"/>
+    </form>
+
+
+</body>
+</html>
