@@ -126,7 +126,7 @@ replacements = {
     r'.*sausage.*':'sausage', 
     r'(?<!sweet )potato(es)?':'potato', 
     r'barramundi|fish fillet|snapper|seabass|salmon':'fish',
-    r'fish(?! (bones|powder|balls?))':'fish', 
+    r'fish(?! (bones|powder|sauce|balls?))':'fish', 
     r'chicken broth':'chicken broth', 
     r'apple':'apple', 
     r'duck':'duck', 
