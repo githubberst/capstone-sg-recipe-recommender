@@ -593,6 +593,12 @@ def show_recommendations(ingredients, N):
 
     return output
 
+def image2html(image_str):
+    return "<img width=100 src='"+image_str+"' />"
+
+def replace_images_to_html(df):
+    df['image'] = df['image'].apply(image2html)
+    return df
 
 ### End of Sandra ipynb code
 
@@ -605,8 +611,6 @@ def main():
 @app.route('/results',methods=['POST'])
 def results():
     form_ingredients = request.form.getlist('ingredients')
-    reccos = show_recommendations(form_ingredients, 5).to_html()
-    print(form_ingredients)
-    print(reccos)
+    reccos = replace_images_to_html(show_recommendations(form_ingredients, 5)).to_html(render_links=True,escape=False)
     return render_template("results.jinja2",data=reccos)
 
