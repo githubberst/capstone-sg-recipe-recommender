@@ -596,8 +596,18 @@ def show_recommendations(ingredients, N):
 def image2html(image_str):
     return "<img width=100 src='"+image_str+"' />"
 
-def replace_images_to_html(df):
+
+def ingredients2html(ingr_list_string):
+    ingr_list = literal_eval(ingr_list_string)
+    returnstring = "<ul>"
+    for item in ingr_list:
+        returnstring = returnstring + "<li>"+item+"</li>"
+    returnstring = returnstring + "</ul>"
+    return returnstring
+
+def cleanup_text(df):
     df['image'] = df['image'].apply(image2html)
+    df['ingredients'] = df['ingredients'].apply(ingredients2html)
     return df
 
 ### End of Sandra ipynb code
@@ -627,6 +637,6 @@ def results():
     recs.sort_values(by='similarity_score', ascending=False, inplace=True)
 
     reco_range = int(request.form['reco_range'])
-    reccos = replace_images_to_html(recs.head(reco_range)).to_html(render_links=True,escape=False)
+    reccos = cleanup_text(recs.head(reco_range)).to_html(render_links=True,escape=False)
     return render_template("results.jinja2",data=reccos,form=request.form, ingredients=flask_disp_ingredients)
 
