@@ -330,10 +330,10 @@ key_ingredient_counts_pro_df = key_ingredient_counts_pro_df.sort_values('count',
 
 top_30_ingredients = key_ingredient_counts_pro_df['key_ingredient'][:30]
 
-flask_disp_ingredients = []
+flask_disp_ingredients = {}
 
 for index,item in top_30_ingredients.items():
-     flask_disp_ingredients.append((item,key_ingredient_counts_df['key_ingredient'][index]))
+     flask_disp_ingredients[item] = key_ingredient_counts_df['key_ingredient'][index]
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -611,6 +611,21 @@ def main():
 @app.route('/results',methods=['POST'])
 def results():
     form_ingredients = request.form.getlist('ingredients')
-    reccos = replace_images_to_html(show_recommendations(form_ingredients, 5)).to_html(render_links=True,escape=False)
-    return render_template("results.jinja2",data=reccos)
+    recs = show_recommendations(form_ingredients, 10000)
+    top_rec = show_recommendations(form_ingredients, 1)
+
+    if 'difficulty' in request.form:
+        diffrecs = pd.DataFrame()
+        for difficulty in request.form.getlist('difficulty'):
+            print(difficulty)
+            diffrecs = pd.concat([diffrecs,recs[recs['difficulty'] == difficulty]])
+        recs = diffrecs
+        recs.sort_values(by='similarity_score', ascending=False, inplace=True)
+
+    recs = recs[recs['n_directions'] <= int(request.form['steps'])]
+    recs = recs[recs['n_all_ingredients'] <= int(request.form['ingrno'])]
+
+    reco_range = int(request.form['reco_range'])
+    reccos = replace_images_to_html(recs.head(reco_range)).to_html(render_links=True,escape=False)
+    return render_template("results.jinja2",data=reccos,form=request.form, ingredients=flask_disp_ingredients)
 

@@ -5,35 +5,43 @@
     <title>FlaskApp</title>
 </head>
 <body>
-<h1>Recipe Dataset</h1>
-<form>
+<form name="ingredients_filter"  method="post" action="/results">
+
+        <h2> Selected Ingredients </h2>
+        {% for ingredient in form.getlist('ingredients') %}
+        <input type="hidden" name="ingredients" value="{{ ingredient }}" />
+        <label>{{ ingredients[ingredient] }}</label>
+        {% endfor %}
+
     <fieldset id="dataset">
-        <input type="radio" value="meatmen"> Meatmen <br/>
-        <input type="radio" value="HPB"> HPB <br/>
-        <input type="radio" value="ramsay"> Gordon Ramsay <br/>
+   Recipe Dataset <br/>
+        <input type="radio" value="meatmen" checked> Meatmen <br/>
+        <input type="radio" value="HPB" disabled> HPB <br/>
+        <input type="radio" value="ramsay" disabled> Gordon Ramsay <br/>
     </fieldset>
 
-    No of Recommendations: <input type="range" id="reco" name="reco" value=5
-         min="1" max="10"  oninput="this.nextElementSibling.value = this.value" /> <output>5</output>
+    No of Recommendations: <input type="range" id="reco_range" name="reco_range" value={{ form['reco_range'] }}
+         min="1" max="10"  oninput="this.nextElementSibling.value = this.value" /> <output>{{ form['reco_range'] }}</output>
          <br/>
-    Difficulty: 
     <fieldset id="difficulty">
-        <input type="radio" value="supereasy"> Super Easy 
-        <input type="radio" value="easy"> Easy 
-        <input type="radio" value="medium"> Medium 
-        <input type="radio" value="hard"> Hard 
+    Difficulty:  <br/>
+        <input type="checkbox" name="difficulty" value="super easy" {% if not 'difficulty' in form or 'super easy' in form.getlist('difficulty') %} checked {%endif%}> Super Easy 
+        <input type="checkbox" name="difficulty"  value="easy"  {% if not 'difficulty' in form or 'easy' in form.getlist('difficulty') %} checked {%endif%}> Easy 
+        <input type="checkbox" name="difficulty"  value="medium"  {% if not 'difficulty' in form or 'medium' in form.getlist('difficulty') %}checked {%endif%}> Medium 
+        <input type="checkbox" name="difficulty"  value="hard"  {% if not 'difficulty' in form or 'hard' in form.getlist('difficulty') %} checked {%endif%}> Hard 
     </fieldset>
 
-    No of Steps: <input type="range" id="steps" name="steps" value=10
-         min="1" max="20"  oninput="this.nextElementSibling.value = this.value" /> <output>10</output>
+    No of Steps: <input type="range" id="steps" name="steps" value={{ form['steps'] }}
+         min="1" max="20"  oninput="this.nextElementSibling.value = this.value" /> <output>{{ form['steps'] }}</output>
          <br/>
 
-    No of Ingredients (including condiments): <input type="range" id="steps" name="steps" value=13
-         min="1" max="30"  oninput="this.nextElementSibling.value = this.value" /> <output>13</output>
+    No of Ingredients (including condiments): <input type="range" id="ingrno" name="ingrno" value={{ form['ingrno'] }}
+         min="1" max="30"  oninput="this.nextElementSibling.value = this.value" /> <output>{{ form['ingrno'] }}</output>
          <br/>
-    Prep Time (mins): <input type="range" id="steps" name="steps" value=15
-         min="5" max="60" step=5  oninput="this.nextElementSibling.value = this.value" /> <output>15</output>
+    Prep Time (mins): <input type="range" id="prept" name="prept" value={{ form['prept'] }}
+         min="5" max="60" step=5  oninput="this.nextElementSibling.value = this.value" /> <output>{{ form['prept'] }}</output>
          <br/>
+    <input type="submit" />
 </form>
 
 {{ data }}

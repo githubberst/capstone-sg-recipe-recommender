@@ -8,8 +8,8 @@
     <form name="ingredients_list"  method="post" action="/results">
         <h1>Tell Us What You Have:</h1>
         {% for ingredient in ingredients %}
-        <input type="checkbox" id="{{ ingredient[0] }}" name="ingredients" value="{{ ingredient[0] }}">
-        <label for="{{ ingredient[0] }}">{{ ingredient[1] }}</label><br>
+        <input type="checkbox" id="{{ ingredient }}" name="ingredients" value="{{ ingredient }}">
+        <label for="{{ ingredient }}">{{ ingredients[ingredient] }}</label><br>
         {% endfor %}
         <h1>Or, Upload Image</h1>
        <input type="file" />
@@ -25,6 +25,16 @@
                 </td>
             </tr>
         </table>
+
+        <input type="hidden" name="difficulty" value="super easy" /> 
+        <input type="hidden" name="difficulty" value="easy" /> 
+        <input type="hidden" name="difficulty" value="medium" /> 
+        <input type="hidden" name="difficulty" value="hard" /> 
+        <input type="hidden" name="reco_range" value="5" /> 
+        <input type="hidden" name="steps" value="10" /> 
+        <input type="hidden" name="ingrno" value="13" /> 
+        <input type="hidden" name="prept" value="15" /> 
+
         <input type="submit" name="submit" value="Show Me!"/>
     </form>
 
