@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <title>FlaskApp</title>
 </head>
+<style>
+:checked + label {
+  background-color: pink;
+}
+</style>
 <body>
     <form name="ingredients_list"  method="post" action="/results">
         <h1>Tell Us What You Have:</h1>
@@ -19,8 +24,8 @@
                 <td> Select One </td>
                 <td>
                     <fieldset id="sampling_type">
-                        <input type="radio" value=""> I want to use as many ingredients as possible in one recipe <br/>
-                        <input type="radio" value=""> I want a few recipes with different combinations of ingredients
+                        <input type="radio" value="" name="sampling_type"> I want to use as many ingredients as possible in one recipe <br/>
+                        <input type="radio" value="" name="sampling_type"> I want a few recipes with different combinations of ingredients
                     </fieldset>
                 </td>
             </tr>

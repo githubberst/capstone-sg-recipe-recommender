@@ -624,6 +624,7 @@ def results():
 
     recs = recs[recs['n_directions'] <= int(request.form['steps'])]
     recs = recs[recs['n_all_ingredients'] <= int(request.form['ingrno'])]
+    recs.sort_values(by='similarity_score', ascending=False, inplace=True)
 
     reco_range = int(request.form['reco_range'])
     reccos = replace_images_to_html(recs.head(reco_range)).to_html(render_links=True,escape=False)
