@@ -3,6 +3,7 @@
 import datetime
 from flask import Flask, render_template, request
 from pathlib import Path
+import urllib.parse
 THIS_FOLDER = Path(__file__).parent.resolve()
 app = Flask(__name__)
 
@@ -605,10 +606,34 @@ def ingredients2html(ingr_list_string):
     returnstring = returnstring + "</ul>"
     return returnstring
 
+def preptime2mins(preptime_literal):
+    time=0
+    if(preptime_literal == 0):
+        return pd.NA
+    preptime_string = literal_eval(preptime_literal)[0]
+    if not preptime_string:
+        return pd.NA
+    numbers = re.search(r'\ *(\d+)\ *',preptime_string)
+    mins = re.search(r'(\d+)\ *min',preptime_string)
+    hours = re.search(r'(\d+)\ *ho?u?r',preptime_string)
+    if mins:
+        time = time + int(mins.group(1))
+    if hours:
+        time = time + int(hours.group(1))*60
+    if time == 0:
+        if numbers:
+            return int(numbers.group(1))
+        return pd.NA
+    else:
+        return time
+
 def cleanup_text(df):
     df['image'] = df['image'].apply(image2html)
     df['ingredients'] = df['ingredients'].apply(ingredients2html)
+    df = df.rename(index=urllib.parse.unquote)
     return df
+
+
 
 ### End of Sandra ipynb code
 
@@ -627,13 +652,14 @@ def results():
     if 'difficulty' in request.form:
         diffrecs = pd.DataFrame()
         for difficulty in request.form.getlist('difficulty'):
-            print(difficulty)
             diffrecs = pd.concat([diffrecs,recs[recs['difficulty'] == difficulty]])
         recs = diffrecs
         recs.sort_values(by='similarity_score', ascending=False, inplace=True)
 
     recs = recs[recs['n_directions'] <= int(request.form['steps'])]
     recs = recs[recs['n_all_ingredients'] <= int(request.form['ingrno'])]
+    recs['prep_time_integer'] = recs['prep_time'].fillna(0).apply(preptime2mins)
+    recs = recs[recs['prep_time_integer'] <= int(request.form['prept'])]
     recs.sort_values(by='similarity_score', ascending=False, inplace=True)
 
     reco_range = int(request.form['reco_range'])
