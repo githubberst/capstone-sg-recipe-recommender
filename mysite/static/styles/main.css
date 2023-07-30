@@ -117,6 +117,7 @@ h1 {
     padding:10px;
     text-transform:capitalize;
     border-bottom: 1px solid white;
+    vertical-align: top;
 }
 
 .table-content table td a {
