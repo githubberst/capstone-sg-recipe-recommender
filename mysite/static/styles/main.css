@@ -1,0 +1,75 @@
+
+@font-face {
+    font-family: 'Agrandir';
+    src: url('../fonts/agrandir-textbold-webfont.woff2') format('woff2'),
+         url('../fonts/agrandir-textbold-webfont.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+
+}
+
+
+@font-face {
+    font-family: 'Agrandir';
+    src: url('../fonts/agrandir-regular-webfont.woff2') format('woff2'),
+         url('../fonts/agrandir-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'Agrandir';
+    src: url('../fonts/agrandir-thinitalic-webfont.woff2') format('woff2'),
+         url('../fonts/agrandir-thinitalic-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+
+}
+
+
+body {
+    font-family: Agrandir;
+    background-image: url("../images/s2.jpg");
+    background-size: cover;
+    background-attachment: fixed;
+    color:white;
+}
+
+div.body-box {
+    
+    margin-top:7%;
+    padding-left: 150px;
+    padding-right:150px;
+}
+
+div.cat-header {
+    opacity: 0.41;
+    background-color: white;
+    color: rgb(77, 52, 42);
+    font-weight: bold;
+    text-align: center;
+    line-height:30px;
+    text-transform:uppercase;
+}
+
+div.cat-content {
+    text-transform:capitalize;
+}
+
+div.note-text {
+    font-style: italic;
+    text-align: center;
+    color: rgb(217, 217, 217);
+}
+
+input.submit-button {
+    color: rgb(77, 52, 42);
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+h1 {
+    font-weight: bold;
+    font-size: 27pt;
+}

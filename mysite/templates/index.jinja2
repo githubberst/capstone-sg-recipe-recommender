@@ -4,18 +4,203 @@
     <meta charset="UTF-8">
     <title>FlaskApp</title>
 </head>
-<style>
-:checked + label {
-  background-color: pink;
-}
-</style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/main.css') }}">
 <body>
+<div class="body-box container">
     <form name="ingredients_list"  method="post" action="/results">
-        <h1>Tell Us What You Have:</h1>
-        {% for ingredient in ingredients %}
-        <input type="checkbox" id="{{ ingredient }}" name="ingredients" value="{{ ingredient }}">
-        <label for="{{ ingredient }}">{{ ingredients[ingredient] }}</label><br>
-        {% endfor %}
+        
+        <div class="row">
+        <div class="col">
+        <h1>I have these ingredients:</h1>
+        </div>
+        </div>
+
+        <div class="row gx-5">
+        <div class="col-6">
+        <div class="row">
+        <div class="cat-header">
+        Veg
+        </div>
+        </div>
+        <div class="row">
+        <div class="col-6 cat-content p-3">
+        <input type="checkbox" id="cabbage" name="ingredients" value="cabbage">
+        <label for="cabbage">cabbage</label><br>
+
+        <input type="checkbox" id="carrot" name="ingredients" value="carrot">
+        <label for="carrot">carrot</label><br>
+
+        <input type="checkbox" id="chilli" name="ingredients" value="chilli">
+        <label for="chilli">chilli</label><br>
+
+        <input type="checkbox" id="coriander" name="ingredients" value="coriander">
+        <label for="coriander">coriander</label><br>
+
+        <input type="checkbox" id="cucumber" name="ingredients" value="cucumber">
+        <label for="cucumber">cucumber</label><br>
+
+        <input type="checkbox" id="garlic" name="ingredients" value="garlic">
+        <label for="garlic">garlic</label><br>
+        
+        </div>
+
+        <div class="col-6 cat-content p-3">
+
+        <input type="checkbox" id="ginger" name="ingredients" value="ginger">
+        <label for="ginger">ginger</label><br>
+        
+        <input type="checkbox" id="onion" name="ingredients" value="onion">
+        <label for="onion">onion</label><br>
+
+        <input type="checkbox" id="parsley" name="ingredients" value="parsley">
+        <label for="parsley">parsley</label><br>
+
+
+        <input type="checkbox" id="potato" name="ingredients" value="potato">
+        <label for="potato">potato</label><br>
+
+        <input type="checkbox" id="spring_onions" name="ingredients" value="spring_onions">
+        <label for="spring_onions">spring onions</label><br>
+
+        <input type="checkbox" id="tomato" name="ingredients" value="tomato">
+        <label for="tomato">tomato</label><br>
+        
+        </div>
+
+        </div>
+
+        </div>
+        <div class="col">
+        <div class="cat-header">
+        Carb
+        </div>
+        <div class="cat-content p-3">
+
+        <input type="checkbox" id="noodle" name="ingredients" value="noodle">
+        <label for="noodle">noodle</label><br>
+
+        <input type="checkbox" id="rice" name="ingredients" value="rice">
+        <label for="rice">rice</label><br>
+        </div>
+        </div>
+        <div class="col">
+        <div class="cat-header">
+        Fruits
+        </div>
+        <div class="cat-content p-3">
+
+        <input type="checkbox" id="apple" name="ingredients" value="apple">
+        <label for="apple">apple</label><br>
+
+        <input type="checkbox" id="lemon" name="ingredients" value="lemon">
+        <label for="lemon">lemon</label><br>
+        <input type="checkbox" id="lime" name="ingredients" value="lime">
+        <label for="lime">lime</label><br>
+        <input type="checkbox" id="orange" name="ingredients" value="orange">
+        <label for="orange">orange</label><br>
+        </div>
+        </div>
+        </div>
+
+        <div class="row gx-5">
+        <div class="col-6">
+        <div class="row">
+        <div class="cat-header">
+        Meat
+        </div>
+        </div>
+        <div class="row">
+        <div class="col-6 cat-content p-3">
+
+        <input type="checkbox" id="beef" name="ingredients" value="beef">
+        <label for="beef">beef</label><br>
+
+        <input type="checkbox" id="chicken" name="ingredients" value="chicken">
+        <label for="chicken">chicken</label><br>
+        </div>
+
+        <div class="col-6 cat-content p-3">
+
+        <input type="checkbox" id="fish" name="ingredients" value="fish">
+        <label for="fish">fish</label><br>
+
+        <input type="checkbox" id="pork" name="ingredients" value="pork">
+        <label for="pork">pork</label><br>
+
+        <input type="checkbox" id="prawns" name="ingredients" value="prawns">
+        <label for="prawns">prawns</label><br>
+        
+        </div>
+        </div>
+        </div>
+
+        <div class="col-6">
+        <div class="row">
+        <div class="cat-header">
+        Others
+        </div>
+        </div>
+        <div class="row">
+        <div class="col-6 cat-content p-3">
+
+        
+        <input type="checkbox" id="egg" name="ingredients" value="egg">
+        <label for="egg">egg</label><br>
+
+
+        <input type="checkbox" id="honey" name="ingredients" value="honey">
+        <label for="honey">honey</label><br>
+
+        <input type="checkbox" id="milk" name="ingredients" value="milk">
+        <label for="milk">milk</label><br>
+
+        </div>
+
+        <div class="col-6 cat-content p-3">
+
+        <input type="checkbox" id="mushroom" name="ingredients" value="mushroom">
+        <label for="mushroom">mushroom</label><br>
+
+
+        <input type="checkbox" id="peanut" name="ingredients" value="peanut">
+        <label for="peanut">peanut</label><br>
+
+        <input type="checkbox" id="stock" name="ingredients" value="stock">
+        <label for="stock">stock</label><br>
+
+
+        <input type="checkbox" id="yogurt" name="ingredients" value="yogurt">
+        <label for="yogurt">yogurt</label><br>
+
+        </div>
+        </div>
+        </div>
+        </div>
+
+
+
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+        <!--
+
         <h1>Or, Upload Image</h1>
        <input type="file" />
         <h1>Sampling:</h1>
@@ -31,6 +216,7 @@
             </tr>
         </table>
 
+!-->
         <input type="hidden" name="difficulty" value="super easy" /> 
         <input type="hidden" name="difficulty" value="easy" /> 
         <input type="hidden" name="difficulty" value="medium" /> 
@@ -39,10 +225,12 @@
         <input type="hidden" name="steps" value="10" /> 
         <input type="hidden" name="ingrno" value="13" /> 
         <input type="hidden" name="prept" value="15" /> 
-
-        <input type="submit" name="submit" value="Show Me!"/>
+        <div class="col-12 gy-2"></div>
+        <div class="col-12 note-text">note: common condiments and herbs are assumed present in your kitchen.</div>
+        <input class="col-12 rounded-pill p-3 submit-button border-0" type="submit" name="submit" value="+ Create My Recipe"/>
     </form>
 
 
+</div>
 </body>
 </html>
