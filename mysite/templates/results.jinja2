@@ -21,14 +21,15 @@
         <input type="hidden" name="ingredients" value="{{ ingredient }}" />
         <label class="ingr-label col-12 rounded-pill">{{ ingredients[ingredient] }}</label>
         </div>
-        {% if loop.index % 5 == 0 %}
+        {% if loop.index == loop.length %}
+        </div>
+        {% elif loop.index % 5 == 0 %}
         </div>
         <div class="col-12 spacer"><br/>
         </div>
         {% endif %}
         {% endfor %}
 
-        </div>
 <!--
     <fieldset id="dataset">
    Recipe Dataset <br/>
