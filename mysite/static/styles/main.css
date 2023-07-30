@@ -63,13 +63,63 @@ div.note-text {
     color: rgb(217, 217, 217);
 }
 
-input.submit-button {
-    color: rgb(77, 52, 42);
+.submit-button {
+    color: rgb(77, 52, 42) !important;;
     text-transform: uppercase;
     font-weight: bold;
+    background-color: white !important;
+}
+
+
+label.ingr-label {
+    opacity: 0.41;
+    background-color: white;
+    color: rgb(77, 52, 42);
+    font-weight: bold;
+    text-align: center;
+    line-height:30px;
+    text-transform:capitalize;
+}
+
+div.spacer {
+    line-height:2px;
+}
+
+.slider input[type=range]{
+    width:80%;
 }
 
 h1 {
     font-weight: bold;
     font-size: 27pt;
+}
+.table-content {
+    max-height:550px;
+}
+.table-content table {
+    border:none;
+    background-color: transparent;
+}
+
+
+.table-content table th{
+    text-align: left;
+    position: sticky;
+    top: 0; 
+    background-color:rgb(25,41,51);
+    vertical-align: top;
+    padding:10px;
+    border:none;
+}
+
+
+.table-content table td{
+    padding:10px;
+    text-transform:capitalize;
+    border-bottom: 1px solid white;
+}
+
+.table-content table td a {
+    color:white !important;
+    text-decoration: none !important;
 }

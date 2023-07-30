@@ -336,6 +336,8 @@ flask_disp_ingredients = {}
 for index,item in top_30_ingredients.items():
      flask_disp_ingredients[item] = key_ingredient_counts_df['key_ingredient'][index]
 
+flask_disp_ingredients["peanut"] = "peanut"
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Create a list of all the ingredients
@@ -595,7 +597,7 @@ def show_recommendations(ingredients, N):
     return output
 
 def image2html(image_str):
-    return "<img width=100 src='"+image_str+"' />"
+    return "<img width=150 src='"+image_str+"' />"
 
 
 def ingredients2html(ingr_list_string):
@@ -627,9 +629,13 @@ def preptime2mins(preptime_literal):
     else:
         return time
 
+def formatname(recipeInfo):
+    return '<a href="'+recipeInfo[2]+'">'+recipeInfo[0]+'</a><br/><a href="'+recipeInfo[2]+'">'+recipeInfo[1]+'</a><br/>'
+
 def cleanup_text(df):
     df['image'] = df['image'].apply(image2html)
     df['ingredients'] = df['ingredients'].apply(ingredients2html)
+    df['Name of Recipe'] = df[['Name of Recipe','image','url']].apply(formatname,axis=1)
     df = df.rename(index=urllib.parse.unquote)
     return df
 
@@ -663,6 +669,10 @@ def results():
     recs.sort_values(by='similarity_score', ascending=False, inplace=True)
 
     reco_range = int(request.form['reco_range'])
-    reccos = cleanup_text(recs.head(reco_range)).to_html(render_links=True,escape=False)
+    recs["Name of Recipe"] = recs.index
+    range_df = cleanup_text(recs.head(reco_range))
+    display_df = range_df[['Name of Recipe','ingredients','n_all_ingredients','difficulty','n_directions','prep_time_integer']].copy()
+    display_df = display_df.rename(columns={"ingredients": "Ingredients Required", "n_all_ingredients": "No of Ingredients","difficulty":"Difficulty","n_directions":"No of Steps","prep_time_integer":"Prep Time (mins)"})
+    reccos = display_df.to_html(render_links=True,escape=False, index=False)
     return render_template("results.jinja2",data=reccos,form=request.form, ingredients=flask_disp_ingredients)
 
