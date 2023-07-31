@@ -6,16 +6,28 @@
 </head>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.4/css/bootstrap5-toggle.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.4/js/bootstrap5-toggle.ecmas.min.js"></script>
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/main.css') }}">
 <body>
+
 <div class="body-box container">
     <form name="ingredients_list"  method="post" action="/results">
         
+
         <div class="row">
         <div class="col">
-        <h1>I have these ingredients:</h1>
+        <h1 class="top-heading">I have these ingredients:</h1>  
+        
+       <input type="checkbox"  id="submitType" name="submitType" data-offvalue="formSubmit" data-onvalue="imageSubmit" data-toggle="toggle" data-onlabel=" "  data-offlabel=" " data-onstyle="dark"  data-offstyle="dark" onchange="if(document.getElementById('submitType').checked){carousel.to(1)}else{carousel.to(0)}"/>
         </div>
         </div>
+
+
+        <div id="myCarousel" class="carousel slide">
+        <div class="carousel-inner">
+        <div class="carousel-item active">
+
 
         <div class="row gx-5">
         <div class="col-6">
@@ -180,6 +192,35 @@
         </div>
 
 
+        </div>
+
+
+        <div class="carousel-item">
+        <div class="col-12">
+        <img id="uploadBtn" width=100 src="{{url_for('static', filename='images/upload.svg')}}" onclick="document.getElementById('uploadImg').click();"/>
+        &nbsp;&nbsp;&nbsp;upload an image of the ingredients in jpg or png
+        <script type="text/javascript">
+
+            function PreviewImage() {
+                var oFReader = new FileReader();
+                oFReader.readAsDataURL(document.getElementById("uploadImg").files[0]);
+
+                oFReader.onload = function (oFREvent) {
+                    document.getElementById("uploadPreview").src = oFREvent.target.result;
+                };
+            };
+
+        </script>
+        <input type=file id="uploadImg" onchange="PreviewImage()" />
+        <br/><br/>
+        <div style="text-align:left">
+        <img id="uploadPreview" />
+        </div>
+
+        </div>
+        </div>
+        </div>
+        </div>
 
         
         
@@ -233,4 +274,14 @@
 
 </div>
 </body>
+<script>
+
+const myCarouselElement = document.querySelector('#myCarousel')
+
+const carousel = new bootstrap.Carousel(myCarouselElement, {
+  interval: 2000,
+  touch: false
+})
+
+</script>
 </html>

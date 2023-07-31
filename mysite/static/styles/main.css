@@ -141,3 +141,31 @@ h1 {
     color:white !important;
     text-decoration: none !important;
 }
+
+.toggle.btn {
+    margin-left:20px;
+    min-height:45px;
+    min-width:30px;
+}
+
+h1.top-heading {
+    float:left;
+}
+
+.carousel-item {
+    min-height: 400px;
+}
+
+#uploadBtn {
+    cursor: pointer;
+}
+
+#uploadPreview {
+    max-width:100%;
+    max-height:300px;
+    
+}
+
+#uploadImg {
+    visibility: hidden;
+}
