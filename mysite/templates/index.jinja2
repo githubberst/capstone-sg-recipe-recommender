@@ -236,6 +236,8 @@
                 } else {
                     alert('An error occurred!');
                     console.log(e)
+                    document.getElementById("uploadPreview").removeAttribute("src")
+                    document.getElementById("uploadPreview").removeAttribute("width")
                 }
                 };
                 xhr.send(formData);
