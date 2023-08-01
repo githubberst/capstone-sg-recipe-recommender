@@ -19,7 +19,10 @@
         <div class="col">
         <h1 class="top-heading">I have these ingredients:</h1>  
         
-       <input type="checkbox"  id="submitType" name="submitType" data-offvalue="formSubmit" data-onvalue="imageSubmit" data-toggle="toggle" data-onlabel=" "  data-offlabel=" " data-onstyle="dark"  data-offstyle="dark" onchange="if(document.getElementById('submitType').checked){carousel.to(1)}else{carousel.to(0)}"/>
+        <label class="switch">
+        <input type="checkbox" id="submitType" name="submitType" onchange="if(document.getElementById('submitType').checked){carousel.to(1)}else{carousel.to(0)}"/>
+        <span class="sliderbar round"></span>
+        </label>
         </div>
         </div>
 
@@ -201,17 +204,20 @@
         &nbsp;&nbsp;&nbsp;upload an image of the ingredients in jpg or png
         <script type="text/javascript">
         var globalRatio = {}
+        var loadImgSrc = ""
             function PreviewImage() {
-
+                loadImgSrc = ""
                 container = document.getElementById("imageContainer")
                 container.innerHTML='<img id="uploadPreview" />'
                 var oFReader = new FileReader();
                 oFReader.readAsDataURL(document.getElementById("uploadImg").files[0]);
 
                 oFReader.onload = function (oFREvent) {
-                    document.getElementById("uploadPreview").src = oFREvent.target.result;
+                    loadImgSrc = oFREvent.target.result;
                 };
 
+                document.getElementById("uploadPreview").src = "{{url_for('static', filename='images/giphy.gif')}}";
+                document.getElementById("uploadPreview").width = "50"
                 var fileSelect = document.getElementById('uploadImg');      
 
                 var files = fileSelect.files;
@@ -224,6 +230,8 @@
                 if (xhr.status === 200) {
                     var jsonData = JSON.parse(xhr.response);
                     console.log(jsonData)
+                    document.getElementById("uploadPreview").src = loadImgSrc
+                    document.getElementById("uploadPreview").removeAttribute("width")
                     annotateAll(jsonData)
                 } else {
                     alert('An error occurred!');

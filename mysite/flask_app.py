@@ -666,7 +666,7 @@ def main():
 def detect_image():
     f = request.files['file-select']
     s_name = secure_filename(f.filename)
-    f_name = os.path.join("uploads",s_name)
+    f_name = os.path.join(THIS_FOLDER / "uploads",s_name)
     f.save(f_name)
     results = image_prediction(f_name)
     os.remove(f_name)
