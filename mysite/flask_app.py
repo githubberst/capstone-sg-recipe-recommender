@@ -644,7 +644,7 @@ def cleanup_text(df):
 from roboflow import Roboflow
 robo_rf = Roboflow(api_key="1QuR0PDlumqwc0YT70dT")
 robo_project = robo_rf.workspace().project("ingredient-detection")
-robo_model = robo_project.version(2).model
+robo_model = robo_project.version(4).model
 
 def image_prediction(filePath):
 

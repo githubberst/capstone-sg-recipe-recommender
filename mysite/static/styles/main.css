@@ -169,3 +169,7 @@ h1.top-heading {
 #uploadImg {
     visibility: hidden;
 }
+
+mark {
+    background-color: rgba(255,243,205,0.4);
+}
