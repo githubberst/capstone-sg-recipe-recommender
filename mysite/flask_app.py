@@ -1,8 +1,10 @@
 # A very simple Flask Hello World app for you to get started with...
 
 import datetime
+import os
 from flask import Flask, render_template, request
 from pathlib import Path
+from werkzeug.utils import secure_filename
 import urllib.parse
 THIS_FOLDER = Path(__file__).parent.resolve()
 app = Flask(__name__)
@@ -639,7 +641,19 @@ def cleanup_text(df):
     df = df.rename(index=urllib.parse.unquote)
     return df
 
+from roboflow import Roboflow
+robo_rf = Roboflow(api_key="1QuR0PDlumqwc0YT70dT")
+robo_project = robo_rf.workspace().project("ingredient-detection")
+robo_model = robo_project.version(2).model
 
+def image_prediction(filePath):
+
+    # visualise prediction
+    # model.predict("your_image.jpg", confidence=40, overlap=30).save("prediction.jpg")
+
+    # save prediction labels for recommendation logic
+    prediction_json = robo_model.predict(filePath, confidence=40, overlap=30).json()
+    return prediction_json
 
 ### End of Sandra ipynb code
 
@@ -648,9 +662,20 @@ def cleanup_text(df):
 def main():
     return render_template("index.jinja2", ingredients=flask_disp_ingredients)
 
+@app.route('/image_detection',methods=['POST'])
+def detect_image():
+    f = request.files['file-select']
+    s_name = secure_filename(f.filename)
+    f_name = os.path.join("uploads",s_name)
+    f.save(f_name)
+    results = image_prediction(f_name)
+    os.remove(f_name)
+    return results
 
 @app.route('/results',methods=['POST'])
 def results():
+
+    
     form_ingredients = request.form.getlist('ingredients')
     recs = show_recommendations(form_ingredients, 10000)
     top_rec = show_recommendations(form_ingredients, 1)

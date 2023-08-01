@@ -12,7 +12,7 @@
 <body>
 
 <div class="body-box container">
-    <form name="ingredients_list"  method="post" action="/results">
+    <form name="ingredients_list"  method="post" action="/results" enctype = "multipart/form-data">
         
 
         <div class="row">
@@ -200,22 +200,87 @@
         <img id="uploadBtn" width=100 src="{{url_for('static', filename='images/upload.svg')}}" onclick="document.getElementById('uploadImg').click();"/>
         &nbsp;&nbsp;&nbsp;upload an image of the ingredients in jpg or png
         <script type="text/javascript">
-
+        var globalRatio = {}
             function PreviewImage() {
+
+                container = document.getElementById("imageContainer")
+                container.innerHTML='<img id="uploadPreview" />'
                 var oFReader = new FileReader();
                 oFReader.readAsDataURL(document.getElementById("uploadImg").files[0]);
 
                 oFReader.onload = function (oFREvent) {
                     document.getElementById("uploadPreview").src = oFREvent.target.result;
                 };
+
+                var fileSelect = document.getElementById('uploadImg');      
+
+                var files = fileSelect.files;
+                var formData = new FormData();
+                var file = files[0];
+                formData.append('file-select', file, file.name);
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/image_detection', true);
+                xhr.onload = function (e) {
+                if (xhr.status === 200) {
+                    var jsonData = JSON.parse(xhr.response);
+                    console.log(jsonData)
+                    annotateAll(jsonData)
+                } else {
+                    alert('An error occurred!');
+                    console.log(e)
+                }
+                };
+                xhr.send(formData);
             };
 
+        function annotateAll(jsonData)
+        {
+            checkboxes = document.querySelectorAll('input[type="checkbox"]')
+             for (var checkbox of checkboxes) {  
+                checkbox.checked = false 
+            }  
+            imgPrv = document.getElementById("uploadPreview")
+            globalRatio = getRatio(jsonData.image.height,jsonData.image.width,imgPrv.height,imgPrv.width)
+            jsonData.predictions.forEach(annotateImage)
+        }
+
+        function annotateImage(value,index,array)
+        {
+            console.log(globalRatio)
+            console.log(value)
+            container = document.getElementById("imageContainer")
+            bounding_box = getBoundingBox(value.x,value.y,value.width,value.height)
+            box_element = document.createElement("div")
+            box_element.style.cssText = 'position:absolute;border:1px solid red;top: '+bounding_box.y1+'%;left: '+bounding_box.x1+'%;width: '+bounding_box.w+'%;height: '+bounding_box.h+'%;color:white;text-align:left;vertical-align:top;-webkit-text-stroke: 1px black;'
+            box_element.textContent = value.class
+            console.log(box_element)
+            container.appendChild(box_element)
+            const checked = document.querySelector('input[id="'+value.class+'"]')
+            checked.checked = true
+            
+        }
+
+        function getRatio(new_h,new_w,old_h,old_w)
+        {
+            return {h_ratio: new_h/100, w_ratio: new_w/100}
+        }
+
+        function getBoundingBox(x,y,width,height)
+        {
+            x1 = (x - width / 2) / globalRatio.w_ratio
+            x2 = (x + width / 2) / globalRatio.w_ratio
+            y1 = (y - height / 2) / globalRatio.h_ratio
+            y2 = (y + height / 2) / globalRatio.h_ratio
+            return {x1: x1, x2: x2, y1: y1, y2: y2, w: (width / globalRatio.w_ratio), h: (height / globalRatio.h_ratio)}
+        }
+
         </script>
-        <input type=file id="uploadImg" onchange="PreviewImage()" />
+        <input type=file id="uploadImg" name="uploadImg" onchange="PreviewImage()" />
         <br/><br/>
-        <div style="text-align:left">
+        <div id="imageContainer" style="text-align:left;position:relative;float:left;">
         <img id="uploadPreview" />
         </div>
+        
 
         </div>
         </div>
@@ -271,7 +336,6 @@
         <input class="col-12 rounded-pill p-3 submit-button border-0" type="submit" name="submit" value="+ Create My Recipe"/>
     </form>
 
-
 </div>
 </body>
 <script>
@@ -282,6 +346,7 @@ const carousel = new bootstrap.Carousel(myCarouselElement, {
   interval: 2000,
   touch: false
 })
+
 
 </script>
 </html>
