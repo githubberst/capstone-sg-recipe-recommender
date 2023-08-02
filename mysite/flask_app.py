@@ -14,23 +14,38 @@ import pandas as pd
 import re
 import numpy as np
 from ast import literal_eval
-from pathlib import Path
-from collections import Counter
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
-import warnings
+from collections import Counter
+from IPython.display import Image, display
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics import jaccard_score
 import nltk
-from nltk.stem import WordNetLemmatizer
-THIS_FOLDER = Path(__file__).parent.resolve()
-
-
 nltk.download('wordnet')
-nltk.download('omw-1.4')
+from nltk.stem import WordNetLemmatizer
+lemmatizer = WordNetLemmatizer()
+
 pd.set_option('display.max_colwidth', None)
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 
+import warnings
 warnings.filterwarnings('ignore')
+prep_diff_df = pd.read_csv(THIS_FOLDER / 'data/prep_diff.csv')
+meatmen_df = pd.read_csv(THIS_FOLDER / 'data/meatmen_scraped_raw.csv')
+meatmen_df = pd.merge(prep_diff_df, meatmen_df, on=['url','image'])
+meatmen_df.difficulty.unique()
+difficulty_mapping = {'super easy': 1, 'easy': 2, 'medium': 3, 'hard': 4}
+meatmen_df['difficulty_scale'] = meatmen_df['difficulty'].map(difficulty_mapping)
+meatmen_df = meatmen_df[meatmen_df['ingredients'] != '[]'] #filtering out recipes that contain empty lists 
+meatmen_df = meatmen_df[meatmen_df['directions'] != '[]'] #filtering out recipes that contain empty directions 
 
+ingredients_df = meatmen_df[['recipe_name','ingredients']]
+
+ingredients_df['n_directions'] = meatmen_df['directions'].apply(literal_eval).apply(len)
+ingredients_df['ingredients'] = ingredients_df['ingredients'].apply(literal_eval) 
 
 def extract_ingredients(ingredients_list):
     # The regex pattern to split at numbers, fractions, and measurement units
@@ -46,33 +61,10 @@ def extract_ingredients(ingredients_list):
     
     return ex_ingredients
 
-prep_diff_df = pd.read_csv(THIS_FOLDER / 'data/prep_diff.csv')
-meatmen_df = pd.read_csv(THIS_FOLDER / 'data/meatmen_scraped_raw.csv')
-meatmen_df = pd.merge(prep_diff_df, meatmen_df, on=['url','image'])
-# check for missing values 
-meatmen_df.difficulty.unique()
-difficulty_mapping = {'super easy': 1, 'easy': 2, 'medium': 3, 'hard': 4}
-meatmen_df['difficulty_scale'] = meatmen_df['difficulty'].map(difficulty_mapping)
-empty_ingredients = meatmen_df[meatmen_df['ingredients'] == '[]']
-empty_directions = meatmen_df[meatmen_df['directions'] == '[]']
-meatmen_df = meatmen_df[meatmen_df['ingredients'] != '[]'] #filtering out recipes that contain empty lists 
-meatmen_df = meatmen_df[meatmen_df['directions'] != '[]'] #filtering out recipes that contain empty directions 
-
-
-ingredients_df = meatmen_df[['recipe_name','ingredients']]
-
-ingredients_df['n_directions'] = meatmen_df['directions'].apply(literal_eval).apply(len)
-
-# Convert the strings into lists - comment this after first run
-ingredients_df['ingredients'] = ingredients_df['ingredients'].apply(literal_eval) 
-
 # Apply the function to the 'ingredients' column
 ingredients_df['ingredients_ex'] = ingredients_df['ingredients'].apply(extract_ingredients)
 ingred_ex_df = ingredients_df[['recipe_name','ingredients_ex', 'n_directions']]
 ingred_ex_df['n_all_ingredients'] = ingred_ex_df['ingredients_ex'].apply(len)
-
-
-
 # Combine all of the ingredient names into a single list
 all_ingredients = []
 for sublist in ingred_ex_df['ingredients_ex']:
@@ -81,8 +73,6 @@ for sublist in ingred_ex_df['ingredients_ex']:
         
 # Count the frequency of each ingredient
 ingredient_counts = Counter(all_ingredients)
-
-lemmatizer = WordNetLemmatizer()
 # Define the replacements
 replacements = {
     r'vermicelli':'bee hoon', 
@@ -105,7 +95,7 @@ replacements = {
     r'\bgarlic\b': 'garlic',
     r'\byogurt\b': 'yogurt',
     r'\bparsley\b': 'parsley',
-    r'\bprawn\b': 'prawn', 
+    r'\bprawns?\b': 'prawn', 
     r'\b(chil(?:i|ie|ies|li|lis|lies))\b': 'chilli', 
     r'\b(peppers?|peppercorn)\b': 'pepper', 
     r'\bsalt\b': 'salt', 
@@ -128,7 +118,7 @@ replacements = {
     r'carrot(?!\s(cake|juice))':'carrot', 
     r'.*sausage.*':'sausage', 
     r'(?<!sweet )potato(es)?':'potato', 
-    r'barramundi|fish fillet|snapper|seabass|salmon':'fish',
+    r'barramundi|fish fillet|snapper|seabass|salmon|sea bass':'fish',
     r'fish(?! (bones|powder|sauce|balls?))':'fish', 
     r'chicken broth':'chicken broth', 
     r'apple':'apple', 
@@ -146,6 +136,7 @@ replacements = {
     r'shallot(s)?':'shallot', 
     r'sweet potato(es)?':'sweet potato',
     r'\bsugars?\b': 'sugar',
+    r'\byoghurt|yogurt\b': 'yoghurt'
 
 }
 
@@ -190,7 +181,6 @@ def process_ingredient(ingredient):
 
 # Apply the function to the 'ingredients_ex' column
 ingred_ex_df['ingredients_processed'] = ingred_ex_df['ingredients_ex'].apply(lambda x: [process_ingredient(ingredient) for ingredient in x])
-
 # Now, we can define the condiments and herbs lists, including the renamed condiment-type ingredients
 condiments = ['pepper', 'sugar', 'salt', 'oil', 'vinegar', 'flour', 'butter', 'water', 
               'oyster sauce', 'fish sauce', 'light soy sauce', 'dark soy sauce', 'palm sugar', 
@@ -225,7 +215,6 @@ def remove_empty_strings(ingredient_list):
     return [ingredient for ingredient in ingredient_list if ingredient]
 
 ingred_ex_df['key_ingredients'] = ingred_ex_df['key_ingredients'].apply(remove_empty_strings)
-
 # Adding new descriptors and units to be removed or handled
 new_units = ['cm', 'bunch', 'pcs','medium','servings','gram', 'size', 'small', 'large', 'approx.','dried', '%','fresh', 'toasted', 'chopped', 'sliced', 'pieces','optional', 'preferably']
 
@@ -266,16 +255,8 @@ ingred_ex_df['ingredients_processed'] = ingred_ex_df['ingredients_processed'].ap
 # update 'key_ingredients'
 ingred_ex_df['key_ingredients'] = ingred_ex_df['ingredients_processed'].apply(extract_key_ingredients)
 ingred_ex_df['key_ingredients'] = ingred_ex_df['key_ingredients'].apply(remove_empty_strings)
-
-# Flatten the 'key_ingredients' lists into a single list
 all_key_ingredients = [ingredient for sublist in ingred_ex_df['key_ingredients'] for ingredient in sublist]
 
-# double check that condiments like 'salt' and 'pepper' are not in the list. 
-# Count the occurrences of 'salt' and 'pepper' in the list
-salt_count = all_key_ingredients.count('salt')
-pepper_count = all_key_ingredients.count('pepper')
-
-# Get the unique key ingredients and their count
 unique_key_ingredients = set(all_key_ingredients)
 num_unique_key_ingredients = len(unique_key_ingredients)
 
@@ -295,28 +276,58 @@ for i in unique_key_ingredients:
 
 # Sort the list by the length of the duplicates in descending order
 dupes_list.sort(key=lambda x: len(x[1]), reverse=True)
-
-
-# Count the occurrences of each key ingredient
-from collections import Counter
-key_ingredient_counts = Counter(all_key_ingredients)
-
-
-
-#Plot the occurrences of top 30 key ingredients after preprocessing 
-
-import pandas as pd
-import matplotlib.pyplot as plt
-
+ingred_ex_df['n_key_ingredients'] = ingred_ex_df['key_ingredients'].apply(len)
+meatmen_df[meatmen_df['prep_time'].isna()]
+def preptime2mins(preptime_literal):
+    time=0
+    if(preptime_literal == 0):
+        return pd.NA
+    preptime_string = literal_eval(preptime_literal)[0]
+    if not preptime_string:
+        return pd.NA
+    numbers = re.search(r'\ *(\d+)\ *',preptime_string)
+    mins = re.search(r'(\d+)\ *min',preptime_string)
+    hours = re.search(r'(\d+)\ *ho?u?r',preptime_string)
+    if mins:
+        time = time + int(mins.group(1))
+    if hours:
+        time = time + int(hours.group(1))*60
+    if time == 0:
+        if numbers:
+            return int(numbers.group(1))
+        return pd.NA
+    else:
+        return time
+meatmen_df['prep_time_integer'] = meatmen_df['prep_time'].fillna(0).apply(preptime2mins)
+time_df = pd.DataFrame({'prep_time_integer': meatmen_df['prep_time_integer']})
+time_df = time_df.dropna()
+time_df['prep_time_integer'] = pd.to_numeric(time_df['prep_time_integer'])
+ingred_ex_df['prep_time_integer'] = meatmen_df['prep_time_integer']
+ingred_ex_df['difficulty_scale'] = meatmen_df['difficulty_scale']
+ingred_ex_df['prep_time_integer'].fillna(0, inplace=True)
 # Convert the counter to a DataFrame
+
+key_ingredient_counts = Counter(all_key_ingredients)
 key_ingredient_counts_df = pd.DataFrame.from_dict(key_ingredient_counts, orient='index').reset_index()
 key_ingredient_counts_df = key_ingredient_counts_df.rename(columns={'index':'key_ingredient', 0:'count'})
 
 # Sort the DataFrame by count
 key_ingredient_counts_df = key_ingredient_counts_df.sort_values('count', ascending=False)
 
+top30 = list(key_ingredient_counts_df['key_ingredient'][:30])
 
-# treat multi-word ingredients as single terms
+all_ex_ingredients = [ingredient for sublist in ingred_ex_df['ingredients_ex'] for ingredient in sublist]
+
+ex_ingredient_counts = Counter(all_ex_ingredients)
+
+# Convert the counter to a DataFrame
+ex_ingredient_counts_df = pd.DataFrame.from_dict(ex_ingredient_counts, orient='index').reset_index()
+ex_ingredient_counts_df = ex_ingredient_counts_df.rename(columns={'index':'ingredient', 0:'count'})
+
+# Sort the DataFrame by count
+ex_ingredient_counts_df = ex_ingredient_counts_df.sort_values('count', ascending=False)
+
+# custom function to treat multi-word ingredients as single terms
 def multi2single_terms(ingredients):
     return [ingredient.replace(' ', '_') for ingredient in ingredients]
 
@@ -328,8 +339,8 @@ key_ingredient_counts_pro = Counter(all_key_ingredients_pro)
 key_ingredient_counts_pro_df = pd.DataFrame.from_dict(key_ingredient_counts_pro, orient='index').reset_index()
 key_ingredient_counts_pro_df = key_ingredient_counts_pro_df.rename(columns={'index':'key_ingredient', 0:'count'})
 key_ingredient_counts_pro_df = key_ingredient_counts_pro_df.sort_values('count', ascending=False)
-
-# e.g. "rice" and "glutinous_rice" will be treated as distinct ingredients
+# Create a list of all the ingredients
+all_key_ingredients = [' '.join(ingredients) for ingredients in ingred_ex_df['key_ingred_processed']]
 
 top_30_ingredients = key_ingredient_counts_pro_df['key_ingredient'][:30]
 
@@ -338,33 +349,16 @@ flask_disp_ingredients = {}
 for index,item in top_30_ingredients.items():
      flask_disp_ingredients[item] = key_ingredient_counts_df['key_ingredient'][index]
 
-flask_disp_ingredients["peanut"] = "peanut"
-
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-# Create a list of all the ingredients
-all_key_ingredients = [' '.join(ingredients) for ingredients in ingred_ex_df['key_ingred_processed']]
-
-# Initialize the TfidfVectorizer with the top 30 ingredients as the vocabulary
-vectorizer = TfidfVectorizer(vocabulary=top_30_ingredients)
+# Initialize the TfidfVectorizer 
+vectorizer = TfidfVectorizer()
 
 # Fit and transform the vectorizer on our corpus
 tfidf_matrix = vectorizer.fit_transform(all_key_ingredients)
 
-
 # Get the names of the features
 features = vectorizer.get_feature_names_out()
 
-
-# illustration of how the matrix looks like with respect to the ingredients 
-
-# Convert the sparse matrix to a dense matrix
-tfidf_matrix_dense = tfidf_matrix.todense()
-
-# Convert the dense matrix to a DataFrame
-tfidf_df = pd.DataFrame(tfidf_matrix_dense, columns=features)
-
-def get_recommendations_with_score(ingredients, N):
+def get_cosine_rec(ingredients, N):
     
     # Transform the ingredients into a TF-IDF vector
     ingredients_vector = vectorizer.transform([' '.join(ingredients)])
@@ -389,46 +383,8 @@ def get_recommendations_with_score(ingredients, N):
 
     return top_recipes
 
-# test_ingred = ['garlic','onion','pork']
-test_ingred = ['garlic','onion','rice']
-
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.metrics import jaccard_score
-
-# test
-def get_recommendations_with_score_adjusted(ingredients, N):
-    # Transform the ingredients into a TF-IDF vector
-    ingredients_vector = vectorizer.transform([' '.join(ingredients)])
-
-    # Compute the cosine similarity between the TFIDF of input ingredients and
-    # TFIDF of the top 30 common key ingredients among the 674 recipes
-    similarity_scores = cosine_similarity(ingredients_vector, tfidf_matrix)
-
-    # Adjust the similarity scores favouring the least number of ingredients in each recipe
-    adjusted_similarity_scores = similarity_scores[0] / (np.log1p(ingred_ex_df['n_all_ingredients'])) 
-
-    # Get the indices and scores of the top N recipes
-    top_recipe_indices = np.argsort(adjusted_similarity_scores)[-N:]
-    top_recipe_scores = np.sort(adjusted_similarity_scores)[-N:]
-
-    # Sort the indices and scores in descending order
-    top_recipe_indices = top_recipe_indices[::-1]
-    top_recipe_scores = top_recipe_scores[::-1]
-
-    # Get the top N recipe recommendations
-    top_recipes = ingred_ex_df.iloc[top_recipe_indices]
-
-    # Add the similarity scores to the DataFrame
-    top_recipes['similarity_score'] = top_recipe_scores
-    
-  
-    return top_recipes
-
-from sklearn.preprocessing import MultiLabelBinarizer
-from sklearn.metrics import jaccard_score
-
-# Initialize the MultiLabelBinarizer with the top 30 common ingredients
-mlb = MultiLabelBinarizer(classes=top_30_ingredients)
+# Initialize the MultiLabelBinarizer 
+mlb = MultiLabelBinarizer()
 
 # Fit and transform the 'key_ingredients' column
 one_hot_encoded = mlb.fit_transform(ingred_ex_df['key_ingred_processed'])
@@ -460,32 +416,6 @@ def get_cosine_onehot(ingredients, N):
       
     return top_recipes
 
-def get_cosine_onehot_adjusted(ingredients, N):
-    # Create a binary vector for the input ingredients
-    ingredients_vector = np.isin(mlb.classes_, ingredients).astype(int).reshape(1, -1)
-
-    # Compute the cosine similarity between the TFIDF of input ingredients and
-    # TFIDF of the top 30 common key ingredients among the 674 recipes
-    similarity_scores = cosine_similarity(ingredients_vector, one_hot_encoded)[0]
-
-    # Adjust the similarity scores favouring the least number of ingredients in each recipe
-    adjusted_similarity_scores = similarity_scores[0] / (np.log1p(ingred_ex_df['n_all_ingredients'])) 
-
-    # Get the indices and scores of the top N recipes
-    top_recipe_indices = np.argsort(adjusted_similarity_scores)[-N:]
-    top_recipe_scores = np.sort(adjusted_similarity_scores)[-N:]
-
-    # Sort the indices and scores in descending order
-    top_recipe_indices = top_recipe_indices[::-1]
-    top_recipe_scores = top_recipe_scores[::-1]
-
-    # Get the top N recipe recommendations
-    top_recipes = ingred_ex_df.iloc[top_recipe_indices]
-
-    # Add the similarity scores to the DataFrame
-    top_recipes['similarity_score'] = top_recipe_scores
-      
-    return top_recipes
 
 def get_jaccard_rec(ingredients, N):
     # Create a binary vector for the input ingredients
@@ -495,36 +425,7 @@ def get_jaccard_rec(ingredients, N):
     # binary vectors of the key ingredients among the 674 recipes
     similarity_scores = [jaccard_score(ingredients_vector, row) for row in one_hot_encoded]
 
-    # Adjust the similarity scores favouring the least number of ingredients in each recipe
-    adjusted_similarity_scores = similarity_scores[0] 
-    
-    # Get the indices and scores of the top N recipes
-    top_recipe_indices = np.argsort(similarity_scores)[-N:]
-    top_recipe_scores = np.sort(similarity_scores)[-N:]
 
-    # Sort the indices and scores in descending order
-    top_recipe_indices = top_recipe_indices[::-1]
-    top_recipe_scores = top_recipe_scores[::-1]
-
-    # Get the top N recipe recommendations
-    top_recipes = ingred_ex_df.iloc[top_recipe_indices]
-
-    # Add the similarity scores to the DataFrame
-    top_recipes['similarity_score'] = top_recipe_scores
-
-    return top_recipes
-
-def get_jaccard_rec_adj(ingredients, N):
-    # Create a binary vector for the input ingredients
-    ingredients_vector = np.isin(mlb.classes_, ingredients).astype(int)
-
-    # Compute the Jaccard similarity between the binary vector of input ingredients and
-    # binary vectors of the key ingredients among the 674 recipes
-    similarity_scores = [jaccard_score(ingredients_vector, row) for row in one_hot_encoded]
-
-    # Adjust the similarity scores favouring the least number of ingredients in each recipe
-    adjusted_similarity_scores = similarity_scores[0] / (np.log1p(ingred_ex_df['n_all_ingredients'])) 
-    
     # Get the indices and scores of the top N recipes
     top_recipe_indices = np.argsort(similarity_scores)[-N:]
     top_recipe_scores = np.sort(similarity_scores)[-N:]
@@ -552,9 +453,6 @@ def get_mod_jaccard_rec_adj(ingredients, N): #modifying the function to return b
     # binary vectors of the key ingredients among the 674 recipes
     similarity_scores = [jaccard_score(ingredients_vector, row) for row in one_hot_encoded]
 
-    # Adjust the similarity scores favouring the least number of ingredients in each recipe
-    adjusted_similarity_scores = similarity_scores[0] / (np.log1p(ingred_ex_df['n_all_ingredients'])) 
-    
     # Get the indices and scores of the top N recipes
     top_recipe_indices = np.argsort(similarity_scores)[-N:]
     top_recipe_scores = np.sort(similarity_scores)[-N:]
@@ -583,7 +481,7 @@ def show_recommendations(ingredients, N):
     output = combined_df[combined_df['recipe_name'].isin(top_recipes['recipe_name'])][['recipe_name', 'image', 'ingredients', 'n_all_ingredients', 'difficulty', 'n_directions', 'prep_time', 'url']]
 
     # Replace the 'image' column with Image objects
-    # output['image'] = output['image'].apply(lambda url: Image(url=url))
+    #output['image'] = output['image'].apply(lambda url: Image(url=url))
 
     # Set 'recipe_name' as the index for both DataFrames
     top_recipes.set_index('recipe_name', inplace=True)
@@ -598,6 +496,8 @@ def show_recommendations(ingredients, N):
 
     return output
 
+
+
 def image2html(image_str):
     return "<img width=150 src='"+image_str+"' />"
 
@@ -609,27 +509,6 @@ def ingredients2html(ingr_list_string):
         returnstring = returnstring + "<li>"+item+"</li>"
     returnstring = returnstring + "</ul>"
     return returnstring
-
-def preptime2mins(preptime_literal):
-    time=0
-    if(preptime_literal == 0):
-        return pd.NA
-    preptime_string = literal_eval(preptime_literal)[0]
-    if not preptime_string:
-        return pd.NA
-    numbers = re.search(r'\ *(\d+)\ *',preptime_string)
-    mins = re.search(r'(\d+)\ *min',preptime_string)
-    hours = re.search(r'(\d+)\ *ho?u?r',preptime_string)
-    if mins:
-        time = time + int(mins.group(1))
-    if hours:
-        time = time + int(hours.group(1))*60
-    if time == 0:
-        if numbers:
-            return int(numbers.group(1))
-        return pd.NA
-    else:
-        return time
 
 def formatname(recipeInfo):
     return '<a href="'+recipeInfo[2]+'">'+urllib.parse.unquote(recipeInfo[0])+'</a><br/><a href="'+recipeInfo[2]+'">'+recipeInfo[1]+'</a><br/>'
