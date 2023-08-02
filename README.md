@@ -1,4 +1,5 @@
-# sg-recipe-recommender: Building a 2-in-1 intelligent tool to recognise ingredients and recommend recipes
+# sg-recipe-recommender: 
+# Building a 2-in-1 intelligent tool to recognise ingredients and recommend recipes
 `Pantry-to-Plate buddy.ai`
 
 ### Problem statement: 
