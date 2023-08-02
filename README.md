@@ -14,4 +14,4 @@ This project aims to supplement other food reduction efforts by providing an eas
 3. Collecting images of ingredients (from Fairprice, Roboflow, Flickr) 
 4. Custom training of object detection model (note: this is run on Google Colab)
 
-### Try the working demo on [https://githubberst.pythonanywhere.com](https://githubberst.pythonanywhere.com) 
+#### Try the working demo on [https://githubberst.pythonanywhere.com](https://githubberst.pythonanywhere.com) 
