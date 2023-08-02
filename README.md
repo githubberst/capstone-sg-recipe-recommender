@@ -1,6 +1,5 @@
-# sg-recipe-recommender: 
 # Building a 2-in-1 intelligent tool to recognise ingredients and recommend recipes
-`Pantry-to-Plate buddy.ai`
+## `Pantry-to-Plate buddy.ai`
 
 ### Problem statement: 
 Given the current food waste situation in Singapore (detailed in repo's ppt deck) and Singaporeans' time-starved lifestyle, how might we help households in Singapore to deal with excess groceries at home and reduce food waste?
@@ -14,4 +13,4 @@ This project aims to supplement other food reduction efforts by providing an eas
 3. Collecting images of ingredients (from Fairprice, Roboflow, Flickr) 
 4. Custom training of object detection model (note: this is run on Google Colab)
 
-##### Try the working demo on [https://githubberst.pythonanywhere.com](https://githubberst.pythonanywhere.com) 
+#### Try the working demo on [https://githubberst.pythonanywhere.com](https://githubberst.pythonanywhere.com) 
