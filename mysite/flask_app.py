@@ -632,13 +632,12 @@ def preptime2mins(preptime_literal):
         return time
 
 def formatname(recipeInfo):
-    return '<a href="'+recipeInfo[2]+'">'+recipeInfo[0]+'</a><br/><a href="'+recipeInfo[2]+'">'+recipeInfo[1]+'</a><br/>'
+    return '<a href="'+recipeInfo[2]+'">'+urllib.parse.unquote(recipeInfo[0])+'</a><br/><a href="'+recipeInfo[2]+'">'+recipeInfo[1]+'</a><br/>'
 
 def cleanup_text(df):
     df['image'] = df['image'].apply(image2html)
     df['ingredients'] = df['ingredients'].apply(ingredients2html)
     df['Name of Recipe'] = df[['Name of Recipe','image','url']].apply(formatname,axis=1)
-    df = df.rename(index=urllib.parse.unquote)
     return df
 
 from roboflow import Roboflow
@@ -696,6 +695,7 @@ def results():
     reco_range = int(request.form['reco_range'])
     recs["Name of Recipe"] = recs.index
     range_df = cleanup_text(recs.head(reco_range))
+    print(range_df)
     display_df = range_df[['Name of Recipe','ingredients','n_all_ingredients','difficulty','n_directions','prep_time_integer']].copy()
     display_df = display_df.rename(columns={"ingredients": "Ingredients Required", "n_all_ingredients": "No of Ingredients","difficulty":"Difficulty","n_directions":"No of Steps","prep_time_integer":"Prep Time (mins)"})
     reccos = display_df.to_html(render_links=True,escape=False, index=False)
